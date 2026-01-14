@@ -29,10 +29,10 @@ Your **license_template** repository now uses official license texts from **SPDX
 
 ## Files in license_template
 
-1. **COPYRIGHT** - Your dual-license statement
-2. **LICENSE-MIT** - Official MIT license from SPDX (with your details)
-3. **LICENSE-APACHE** - Official Apache 2.0 license from SPDX
-4. **README.md** - Copy of COPYRIGHT (as requested)
+1. **LICENSE-MIT** - Official MIT license from SPDX (with your details)
+2. **LICENSE-APACHE** - Official Apache 2.0 license from SPDX
+3. **LICENSES_INFO.md** - Documentation about the licenses and SPDX sources
+4. **README.md** - Dual-license statement and contribution guidelines
 
 ## Using the Template
 
