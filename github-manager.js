@@ -129,23 +129,6 @@ class GitHubManager {
     const mitTemplate = await this.fetchOfficialLicense('MIT');
     const apacheTemplate = await this.fetchOfficialLicense('Apache-2.0');
 
-    // COPYRIGHT file (following Rust project's style)
-    const copyright = `Short version for non-lawyers:
-
-This project is dual-licensed under Apache 2.0 and MIT terms.
-
-Longer version:
-
-Copyright (c) ${year} ${author}
-
-Except as otherwise noted (below and/or in individual files), this project is
-licensed under the Apache License, Version 2.0 <LICENSE-APACHE> or
-<http://www.apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT>
-or <http://opensource.org/licenses/MIT>, at your option.
-`;
-
-    await this.createFile(repoName, 'COPYRIGHT', 'Add COPYRIGHT', copyright);
-
     // README.md (following Rust ecosystem style)
     const readme = `# ${repoName}
 
@@ -156,8 +139,7 @@ or <http://opensource.org/licenses/MIT>, at your option.
 This project is dual-licensed under the terms of both the MIT license and the
 Apache License (Version 2.0).
 
-See [LICENSE-APACHE](LICENSE-APACHE), [LICENSE-MIT](LICENSE-MIT), and
-[COPYRIGHT](COPYRIGHT) for details.
+See [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT) for details.
 
 ### Contribution
 
@@ -166,7 +148,7 @@ for inclusion in this project by you, as defined in the Apache-2.0 license,
 shall be dual licensed as above, without any additional terms or conditions.
 `;
 
-    await this.createFile(repoName, 'README.md', 'Update README', readme);
+    await this.createFile(repoName, 'README.md', 'Update README with dual-license info', readme);
 
     // LICENSE-MIT (replace placeholders with actual values)
     const mitLicense = mitTemplate
