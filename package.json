@@ -1,0 +1,15 @@
+{
+  "name": "github-manager",
+  "version": "1.0.0",
+  "description": "SDK-based GitHub repository manager",
+  "main": "github-manager.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["github", "sdk", "octokit", "automation"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^21.0.2"
+  }
+}
