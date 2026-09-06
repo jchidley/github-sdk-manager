@@ -1,5 +1,7 @@
 # Why Your Tool Doesn't Need MCP
 
+> Retained historical design discussion and attributed examples, not current executable guidance or a measured comparison for this tool. Token counts and general claims about protocol capabilities are source-era observations, not universal performance results. The manager's `list` output is not JSON and `info` includes an authentication banner; the JSON pipelines below do not work as written. Bulk loops and generated scripts are illustrative, not approved actions. Follow the [README](README.md#approval-and-data-boundaries) and [Quick Start](QUICKSTART.md) for current effects and concrete publication approval. Quoted external scripts are not this repository's entrypoints.
+
 Based on Mario Zechner's article: [What if you don't need MCP at all?](https://mariozechner.at/posts/2025-11-02-what-if-you-dont-need-mcp/)
 
 ## TL;DR

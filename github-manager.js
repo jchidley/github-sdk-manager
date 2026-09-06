@@ -7,10 +7,11 @@
  * Usage:
  *   node github-manager.js create-repo my-new-repo "Description here"
  *   node github-manager.js clone-settings rust_template my-new-repo
- *   node github-manager.js setup-rust-project my-new-repo
+ *   node github-manager.js setup-rust my-new-repo
  * 
  * Requires: npm install @octokit/rest
- * Setup: export GITHUB_TOKEN=ghp_your_token_here
+ * Setup: load GITHUB_TOKEN through the approved credential helper without printing it.
+ * Writes run immediately: confirm exact targets, payloads/settings, and effects first.
  */
 
 const { Octokit } = require("@octokit/rest");
@@ -220,9 +221,11 @@ mod tests {
 
 ${projectName ? `Project: ${projectName}` : ''}
 
-## Build Configuration
+## Optional Local Build Configuration
 
-Add this to \`~/.cargo/config.toml\`:
+The following example requires a compatible installed linker and targets this machine's CPU.
+It is not a portable build default. After reviewing the effects, use project-local
+\`.cargo/config.toml\` if appropriate; do not change global Cargo settings automatically:
 
 \`\`\`toml
 [build]
@@ -364,7 +367,7 @@ async function main() {
   if (!token) {
     console.error('Error: GITHUB_TOKEN environment variable not set');
     console.error('Get a token from: https://github.com/settings/tokens');
-    console.error('Then: export GITHUB_TOKEN=ghp_your_token_here');
+    console.error('Load an approved GITHUB_TOKEN into this process through your credential helper; never print it or save it in dotfiles.');
     process.exit(1);
   }
 
@@ -421,15 +424,22 @@ async function main() {
         console.log(`
 GitHub Repository Manager
 
+Safety: list/info are read-only. Other commands write immediately without preview,
+confirmation, or rollback. Confirm exact targets and payloads/settings first.
+Creation defaults to public; clone-settings can change visibility; setup overwrites
+files; add-topics replaces topics. SPDX payloads are re-fetched, approved base SHAs
+are not enforced, and Actions are not disabled. Stop if exact approval/policy cannot
+be maintained. Help/unknown commands authenticate first. See README.md before any write.
+
 Commands:
   create-repo <name> [description]           Create a new repository
-  clone-settings <source> <target>           Clone settings from one repo to another
+  clone-settings <source> <target>           Copy selected settings including visibility
   setup-dual-license <repo> [author]         Set up dual-license template (Apache-2.0 + MIT)
   setup-rust <repo> [project-name]           Set up Rust project structure
   create-from-template <template> <name>     Create repo from template
   make-template <repo>                       Make repo a template
-  add-topics <repo> <topic1> [topic2...]     Add topics/tags
-  list                                       List all repositories
+  add-topics <repo> <topic1> [topic2...]     Replace all topics/tags
+  list                                       List one page (up to 100 repositories)
   info <repo>                                Get repository info
 
 Examples:

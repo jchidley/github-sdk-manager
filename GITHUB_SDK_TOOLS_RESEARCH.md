@@ -1,5 +1,7 @@
 # GitHub SDK Tools for LLMs and Automation
 
+> Retained historical research, not current operating instructions or verified capability claims. Star counts and market comparisons are not refreshed measurements. The current manager implements no explicit throttling/retry policy and writes no COPYRIGHT file; upstream SDK behavior is not independently certified. Setup commands overwrite README in sequence, and mutable licence downloads/latest-SHA updates do not enforce approved payload/base identity. SDK snippets and bulk loops below are illustrative: do not execute them from this document. Use the [README](README.md#approval-and-data-boundaries) and [Quick Start](QUICKSTART.md) for current effects, exact-batch approval, credentials, and partial-failure handling. No Pi coding-agent integration or model-quality improvement is established here.
+
 ## Executive Summary
 
 For direct GitHub automation and LLM integration, **Octokit** is the official and most mature SDK ecosystem. Your `github-sdk-manager` sits in this space as a higher-level automation tool built on Octokit.

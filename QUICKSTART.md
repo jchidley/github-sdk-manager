@@ -1,162 +1,55 @@
-# Quick Start Guide
+# GitHub SDK Manager: Inspect Before Writing
 
-Get up and running with GitHub SDK Manager in 5 minutes.
+Start with read-only inspection. The [README effect table](README.md#approval-and-data-boundaries) is the command and approval reference. Write commands run immediately, with no built-in preview, confirmation, or rollback.
 
-## 1. Clone and Install
+## Local prerequisites
 
-```bash
-git clone https://github.com/jchidley/github-sdk-manager.git
-cd github-sdk-manager
-npm install
-```
+Use the canonical checkout. If setting up a new checkout is authorized, clone it on the intended OS's normal Git filesystem, inspect `package.json`, and install its declared dependencies with `npm install`. Do not install dependencies merely to review documentation. The declared `npm test` is a failing placeholder, not a passing test suite.
 
-## 2. Set Up GitHub Token
+The source uses CommonJS `require('@octokit/rest')` while the manifest selects `^21.0.2`. Verify the installed package/runtime combination before claiming CLI compatibility; this guide does not establish a successful installed-runtime test.
 
-```bash
-# Get token from: https://github.com/settings/tokens/new
-# Required scope: repo (full repository access)
+## Offline guidance checks
 
-export GITHUB_TOKEN=ghp_your_token_here
+Run `node --check github-manager.js` and `node --test test-guidance.cjs` from this repository's root. Even `--help` or an unknown command enters authentication in the real CLI, so neither is an offline check. These checks load the source with a fake SDK and forbidden network access, then inspect generated README/help text. They require no token or installed Octokit and do not validate real API behavior. The placeholder `npm test` remains separate and failing.
 
-# Make it permanent:
-echo 'export GITHUB_TOKEN=ghp_your_token_here' >> ~/.bashrc
-source ~/.bashrc
-```
+## Authentication and read-only checks
 
-## 3. Test It
+Use an already approved `GITHUB_TOKEN` provisioned into the consuming process by the machine's credential helper. Do not paste tokens into commands, save them in `.bashrc`, print them, or assume a particular prefix proves validity. Credential creation and expanded permissions need separate approval.
 
 ```bash
-# List your repositories
+# Shows presence only, not the value.
+node -e "console.log(process.env.GITHUB_TOKEN ? 'GITHUB_TOKEN is set' : 'GITHUB_TOKEN is missing')"
+
+# Read-only API calls, once prerequisites and authentication are available.
 node github-manager.js list
+node github-manager.js info REPOSITORY_NAME
 ```
 
-## 4. Common Workflows
+Replace `REPOSITORY_NAME` with the intended repository. Both commands print an authentication banner. `list` prints human-readable lines, not JSON; `info` prints a banner followed by JSON. Do not pipe either directly into a JSON parser or derive a bulk-write target list from its display text. Listing currently reads at most one page of 100 repositories and may include repositories owned by other accounts. Methods target the authenticated username; copying names from that display can target the wrong owner. A successful login is not verification of the intended owner.
 
-### Create a New Rust Project
+## Prepare a write plan
 
-```bash
-# Complete setup in 3 commands
-node github-manager.js create-repo my-rust-cli "My CLI tool"
-node github-manager.js setup-rust my-rust-cli
-node github-manager.js setup-dual-license my-rust-cli "Your Name"
+Before running a write command or generated SDK script:
 
-# Add topics for discoverability
-node github-manager.js add-topics my-rust-cli rust cli command-line
-```
+1. Establish the authenticated owner and explicit target repositories, visibility, and branches. CLI creation defaults to public; `clone-settings` also copies visibility.
+2. Inspect the exact implementation and current target contents/settings. Prepare intended payloads and expected base/file SHAs without writing. Rust/licence setup overwrites files, not just missing sections; topics are replaced.
+3. Present the concrete plan and exclusions for approval. Include remote commits, settings changes, licence choice, and any partial-failure risk. For bulk work, enumerate the batch instead of executing a loop over every discovered repository.
+4. Recheck expected identity and state, then verify that the chosen execution path can enforce the approved payload/base and account policy. The current manager cannot pin an approved SPDX payload, accepts the latest file SHA rather than an approved base, and does not disable Actions. If those requirements apply, do not run its mutating CLI: stop for separately scoped implementation work. Stop on drift, missing prerequisites or partial failure; preserve completed results before preparing any retry.
+5. Verify the remote result. A command's output alone does not establish that all requested files/settings are correct.
 
-Result:
-- ✅ Repository created on GitHub
-- ✅ Cargo.toml with bin + lib targets
-- ✅ src/main.rs and src/lib.rs
-- ✅ LICENSE-MIT and LICENSE-APACHE (from SPDX)
-- ✅ COPYRIGHT file (Rust project style)
-- ✅ README with license section
-- ✅ .gitignore for Rust
-- ✅ Topics for GitHub search
-
-### Add Dual-License to Existing Repo
-
-```bash
-node github-manager.js setup-dual-license existing-repo "Your Name"
-```
-
-Creates proper MIT/Apache-2.0 dual-licensing following Rust ecosystem standards.
-
-### Create from Template
-
-```bash
-# Make a repository a template (one time)
-node github-manager.js make-template my-template
-
-# Create new repos from it
-node github-manager.js create-from-template my-template new-project "Description"
-```
-
-### Clone Repository Settings
-
-```bash
-# Copy all settings from one repo to another
-node github-manager.js clone-settings source-repo target-repo
-```
-
-Copies:
-- Repository settings (wikis, issues, projects)
-- Merge strategies
-- Topics/tags
-- Description and homepage
-
-## 5. Programmatic Usage
-
-```javascript
-const GitHubManager = require('./github-manager.js');
-
-async function myAutomation() {
-  const manager = await new GitHubManager(process.env.GITHUB_TOKEN).init();
-  
-  // Create and configure repository
-  await manager.createRepo('my-project', 'Description');
-  await manager.setupDualLicense('my-project', 'Your Name');
-  await manager.addTopics('my-project', ['tag1', 'tag2']);
-  
-  // Get repo info
-  const info = await manager.getRepo('my-project');
-  console.log(info.html_url);
-}
-
-myAutomation();
-```
+Do not execute a setup command just to learn which files it writes. The README lists those files. `setup-dual-license` re-fetches mutable upstream text after any manual preflight; independent prior inspection does not bind what the command writes. Both setup commands replace README wholesale, so chaining them loses the earlier README contents. Empty source topics in `clone-settings` do not clear target topics. A 404 from `createFile` is not a proven absence check; its catch also covers failed updates.
 
 ## Troubleshooting
 
-### "Bad credentials" error
+- **Authentication failure:** check token presence without revealing it, then verify account/repository permissions through a read-only call. Request the precise missing access; do not silently create or rotate credentials.
+- **404:** verify owner, repository, branch/path, and access. Do not treat every 404 as permission to create or overwrite something.
+- **Rate limiting:** inspect actual rate-limit/Retry-After headers; respect reset and secondary limits. Stop or wait within the task budget, rather than switch tokens or accounts to evade limits.
+- **Partial setup:** inspect the actual remote files/settings and prepare an updated, bounded plan. Do not repeat all writes blindly.
 
-Your token is expired or incorrect:
-```bash
-# Check if set
-echo $GITHUB_TOKEN
+## References
 
-# Get new token: https://github.com/settings/tokens/new
-export GITHUB_TOKEN=ghp_new_token_here
-```
-
-### "Not Found" error
-
-Repository doesn't exist or you don't have access:
-```bash
-# List all your repos
-node github-manager.js list
-```
-
-### Rate limiting
-
-GitHub API has rate limits (5000 requests/hour for authenticated users):
-```bash
-# Check your rate limit
-curl -H "Authorization: token $GITHUB_TOKEN" \
-  https://api.github.com/rate_limit | jq '.rate'
-```
-
-## Next Steps
-
-- Read [README.md](README.md) for complete documentation
-- See [COMPARISON.md](COMPARISON.md) for before/after examples
-- Check [DUAL_LICENSE_PATTERNS.md](DUAL_LICENSE_PATTERNS.md) for licensing research
-- Review [LICENSES_INFO.md](LICENSES_INFO.md) for SPDX verification
-
-## Examples Repository
-
-All documentation files in this repo were created using this tool!
-
-```bash
-# This project's setup was automated:
-node github-manager.js create-repo github-sdk-manager "Description"
-node github-manager.js setup-dual-license github-sdk-manager "Jack Chidley"
-node github-manager.js add-topics github-sdk-manager github sdk octokit automation
-```
-
-## Links
-
-- **Repository**: https://github.com/jchidley/github-sdk-manager
-- **Issues**: https://github.com/jchidley/github-sdk-manager/issues
-- **Octokit Docs**: https://octokit.github.io/rest.js
-- **GitHub API**: https://docs.github.com/en/rest
+- [README](README.md): effect table and implementation entrypoint
+- [API skill](.claude/skills/github-api/SKILL.md): illustrative Octokit fragments and safety boundaries
+- [Licence context](LICENSES_INFO.md): retained historical verification, not a live payload check
+- [Octokit documentation](https://octokit.github.io/rest.js/)
+- [GitHub API documentation](https://docs.github.com/en/rest)

@@ -1,5 +1,7 @@
 # License Template - Official Sources
 
+> Retained historical verification of another repository, not a current licence-payload or legal review. Its listed paths and hashes are not established by this guidance pass. Before reusing the command examples, follow the [README effect table](README.md#approval-and-data-boundaries): template creation writes a public repository, and licence setup overwrites README/licence files. Obtain approval for the exact target and independently verified payloads. This manager does not validate downloaded licence text or HTTP status and re-fetches mutable upstream text instead of applying an approved snapshot. Do not run it when approved bytes cannot be bound to the write. SPDX provenance alone does not prove the returned bytes or grant authority to relicense existing work.
+
 ## Summary
 
 Your **license_template** repository now uses official license texts from **SPDX** (Software Package Data Exchange), maintained by the Linux Foundation. This is the canonical/authoritative source for OSI-approved open source licenses.

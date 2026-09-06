@@ -5,7 +5,13 @@ description: Octokit (official GitHub SDK) best practices, common operations, an
 
 # GitHub API / Octokit Skill
 
-This skill provides guidance, patterns, and examples for using Octokit (the official GitHub SDK) to interact with the GitHub API.
+This skill provides Octokit examples for GitHub API work. For repository-specific commands and effects, read the [README](../../../README.md#approval-and-data-boundaries).
+
+## Scope and approval
+
+Reviews and discovery stay read-only. Complete authorized local preparation autonomously, but obtain confirmation of the owner, visibility, branch/base, exact paths/payloads or settings, and side effects before remote writes. Deletion, visibility changes, merges, releases, and bulk operations need their concrete effects stated explicitly. Recheck identity and expected file/branch SHAs immediately before writing; stop on drift or partial failure and preserve completed results.
+
+Examples below are API fragments, not approved actions or executable preview/apply workflows. Before adapting a fragment, carry an explicit branch/ref and approved expected SHA through both read and write calls; defaults and a newly fetched latest SHA do not protect an approved base. The manager's licence command re-fetches mutable content instead of applying a reviewed snapshot, so do not run it when exact approved payloads cannot be enforced. Its list is only one page and may include other owners, while its methods target the authenticated username. Do not turn displayed names into a bulk-write list. The current manager writes immediately; it has no dry-run or confirmation gate. Do not run a write command to discover its effects. `clone-settings` can change visibility, licence setup overwrites README/licence files, and topic updates replace the topic set. Follow the README's complete effect table. Never enable writes, install dependencies, or change authentication merely because this skill was loaded.
 
 ## When to Use This Skill
 
@@ -33,12 +39,9 @@ const octokit = new Octokit({
 
 Generate at: https://github.com/settings/tokens
 
-**Minimum scopes needed:**
-- `repo` - Full control of private repositories (includes public repos)
-- `workflow` - Update GitHub Action workflows (if needed)
-- `admin:org` - Manage organization settings (if working with orgs)
+Use an already provisioned, least-privilege credential with access only to the required repositories and operations. Fine-grained tokens and GitHub App credentials do not share one prefix or scope model; verify the authenticated identity and endpoint permissions rather than guessing from a token prefix. Classic scopes such as `repo`, `workflow`, or `admin:org` are broad and are not a default requirement for read-only work. Credential creation or permission expansion requires separate approval.
 
-**Token format:** Starts with `ghp_` (personal access token)
+Load approved credentials into the consuming process without printing values or persisting them in dotfiles. Do not log request headers, authentication objects, or private response bodies.
 
 ### Checking Authentication
 
@@ -325,7 +328,7 @@ const { data: repo } = await octokit.repos.createInOrg({
 const { data: user } = await octokit.users.getAuthenticated();
 console.log(`Username: ${user.login}`);
 console.log(`Name: ${user.name}`);
-console.log(`Email: ${user.email}`);
+// Avoid printing personal account fields unless the task actually needs them.
 ```
 
 #### List User Repositories
@@ -383,7 +386,7 @@ try {
   }
   
   if (error.response) {
-    console.error('Response:', error.response.data);
+    console.error('HTTP status:', error.status); // Do not dump private response data.
   }
 }
 ```
@@ -408,7 +411,9 @@ console.log(`Reset: ${new Date(rateLimit.rate.reset * 1000)}`);
 
 ## Best Practices
 
-### 1. Always Check Authentication First
+### 1. Verify identity before authorized API execution
+
+Offline review, parsing and stubbed tests need no token or authentication request. On the real CLI, even help/unknown commands authenticate first. For authorized API work, compare the returned login to the expected owner; a valid token alone is not the ownership check.
 
 ```javascript
 async function verifyAuth(octokit) {
@@ -480,10 +485,12 @@ async function updateMultipleFiles(files) {
   
   for (const file of files) {
     try {
-      const result = await updateFile(file.path, file.content);
+      const result = await updateFile(file.owner, file.repo, file.path, file.content, file.message);
       results.push({ success: true, file: file.path, result });
     } catch (error) {
-      results.push({ success: false, file: file.path, error: error.message });
+      results.push({ success: false, file: file.path, status: error.status });
+      // Stop: inspect partial results and revalidate the remaining approved plan.
+      return results;
     }
   }
   
@@ -543,7 +550,7 @@ async function main() {
   } catch (error) {
     console.error('\n❌ Error:', error.message);
     if (error.response) {
-      console.error('Response:', error.response.data);
+      console.error('HTTP status:', error.status); // Do not dump private response data.
     }
     process.exit(1);
   }
@@ -553,6 +560,8 @@ main();
 ```
 
 ## Installation
+
+Separate authorized setup only: inspect the repository's existing manifest and runtime compatibility first; do not install or upgrade dependencies to perform a documentation review. The alternative package commands below are examples, not a request to change the declared package manager or dependency range.
 
 ```bash
 npm install @octokit/rest
@@ -661,7 +670,9 @@ async function updateMultipleFiles(owner, repo, files) {
       );
       results.push({ success: true, path: file.path, url });
     } catch (error) {
-      results.push({ success: false, path: file.path, error: error.message });
+      results.push({ success: false, path: file.path, status: error.status });
+      // Stop: do not silently continue remote writes after a partial failure.
+      return results;
     }
   }
   
@@ -673,10 +684,9 @@ async function updateMultipleFiles(owner, repo, files) {
 
 ### "Bad credentials" Error
 
-- Check that GITHUB_TOKEN is set: `echo $GITHUB_TOKEN`
-- Verify token starts with `ghp_`
-- Generate new token at: https://github.com/settings/tokens
-- Ensure token has correct scopes (usually `repo`)
+- Check presence without printing the value: `node -e "console.log(process.env.GITHUB_TOKEN ? 'GITHUB_TOKEN is set' : 'GITHUB_TOKEN is missing')"`
+- Verify the authenticated owner with a read-only request and check the required repository permissions.
+- Do not infer validity from a prefix, print the token, or rotate/expand access automatically. Request the precise missing credential permission when needed.
 
 ### "Not Found" Error (404)
 
@@ -694,9 +704,8 @@ async function updateMultipleFiles(owner, repo, files) {
 ### Rate Limiting (403)
 
 - Check rate limit: `octokit.rateLimit.get()`
-- Authenticated requests: 5,000/hour
-- Unauthenticated: 60/hour
-- Wait for reset time or use multiple tokens
+- Limits vary by authentication and endpoint; inspect the actual rate-limit and retry headers.
+- Respect reset/Retry-After and secondary limits. Stop or wait within the authorized task budget; do not rotate tokens or accounts to evade limits.
 
 ## Resources
 
