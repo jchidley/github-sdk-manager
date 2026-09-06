@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "kind": "repo-preflight-disposition",
+  "identity": "github.com/jchidley/github-sdk-manager",
+  "decision": "changes-published",
+  "reviewedCommit": "3e6b6dac034195376b4b4902c5664912c1da3130",
+  "operation": "inspect",
+  "files": {
+    ".claude/skills/github-api/SKILL.md": "c573d49fe4ea535a72fa42e3bb70f1a832a9c367b056f7e6bf8f9a27d4940d6c",
+    "GITHUB_SDK_TOOLS_RESEARCH.md": "c6b7d9b3b8895718438ea446521085ad048a1e5956b3cc6bf53ea9aefade14d8",
+    "LICENSES_INFO.md": "f8ab2e9ba634dd53224828ac3b8ff70d9661b84931ad6401ca4255b9c50777d6",
+    "QUICKSTART.md": "3c4a5a280d1e5dd7f1d71bc43dd05552679ae2c0fb5ca4f392eb15e119081fe1",
+    "README.md": "32383fd5f8b20ea4bdfa0accab2385eb9b77978860743358d3650252a26e3ef5",
+    "WHY_NO_MCP.md": "c75ba22408abd819e1c63a2ce4351fb335145f2f4cf8dffdc78af5bead32a3d0",
+    "github-manager.js": "2d7f1268f36a9b01408008744d59a1fba3106f3eb9d3143ff6710352ea49713e",
+    "test-guidance.cjs": "d409f988c217464da747bc6ca439a462ab09282daaf4b41fd379bb07ef57ffa6"
+  },
+  "profileId": "4e2f946311539a962f68da645c3a22ac068d8be0022fc08f8ed3cae14331fcc2",
+  "reviewer": "controller-pi-session-01a07795-640e-7529-b8bf-bbdc58622b3e",
+  "summary": "Validated guidance changes are published at the reviewed commit.",
+  "evidenceSummary": [
+    "Validated guidance candidate committed and pushed to main at 3e6b6dac034195376b4b4902c5664912c1da3130; post-publication Repo Preflight reports current.",
+    "Account-wide rollout identity, source scope, disposition, and validation evidence were reconciled."
+  ],
+  "limitations": [
+    "Eight-path guidance/generated-text candidate. Control/API logic unchanged outside four inspected text regions; package and retained test unchanged.",
+    "Nine offline VM/stub tests pass; source syntax passes. No installed Octokit, credential, remote API, repository creation/settings/commit or SPDX fetch execution.",
+    "Approved payload/base, owner identity, Actions policy, HTTP validation and partial-failure defects documented, not hardened. This CLI is not a publication executor for exact-payload/policy-gated work.",
+    "Historical SDK/MCP/licensing discussions are not fresh external capability, legal or measured agent-improvement evidence. Refresh target/base/privacy before publication approval."
+  ],
+  "recordedAt": "2026-09-06T22:49:05.162Z",
+  "publicationApproved": false
+}
